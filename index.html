@@ -1,99 +1,80 @@
-import pygame
-import random
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Beat Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: black;
+        }
 
-# Initialize Pygame
-pygame.init()
+        #score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 24px;
+        }
 
-# Get the system's display size
-display_info = pygame.display.Info()
-WINDOW_WIDTH = display_info.current_w
-WINDOW_HEIGHT = display_info.current_h
+        .cube {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+        }
 
-# Set up the window in fullscreen mode
-window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT), pygame.FULLSCREEN)
-pygame.display.set_caption('Vista Beat')
+        .cube.red {
+            background-color: red;
+        }
 
-# Colors
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
+        .cube.blue {
+            background-color: blue;
+        }
+    </style>
+</head>
+<body>
+    <div id="score">Score: 0</div>
 
-# Fonts
-font_large = pygame.font.Font(None, 48)
-font_medium = pygame.font.Font(None, 36)
-font_small = pygame.font.Font(None, 24)
+    <script>
+        // Function to generate a new cube
+        function generateCube() {
+            const size = Math.floor(Math.random() * 31) + 20; // Random size between 20 and 50
+            const x = Math.floor(Math.random() * (window.innerWidth - size));
+            const y = -size;
+            const color = Math.random() < 0.5 ? 'red' : 'blue';
 
-# Game variables
-score = 0
-clock = pygame.time.Clock()
-cubes = []
-cube_speed = 8
-cube_spawn_frequency = 999
+            const cube = document.createElement('div');
+            cube.classList.add('cube', color);
+            cube.style.width = size + 'px';
+            cube.style.height = size + 'px';
+            cube.style.left = x + 'px';
+            cube.style.top = y + 'px';
 
-# Function to generate a new cube
-def generate_cube():
-    size = random.randint(20, 50)
-    x = random.randint(size, WINDOW_WIDTH - size)
-    y = -size
-    color = random.choice([RED, BLUE])
-    cubes.append({'rect': pygame.Rect(x, y, size, size), 'color': color})
+            document.body.appendChild(cube);
 
-# Function to draw text on screen
-def draw_text(text, font, color, x, y):
-    text_surface = font.render(text, True, color)
-    text_rect = text_surface.get_rect()
-    text_rect.center = (x, y)
-    window.blit(text_surface, text_rect)
+            cube.addEventListener('click', function () {
+                cube.remove();
+                score++;
+                scoreElement.textContent = 'Score: ' + score;
+            });
 
-# Main game loop
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            if event.button == 1:  # Left mouse button
-                for cube in cubes[:]:
-                    if cube['color'] == RED and cube['rect'].collidepoint(mouse_x, mouse_y):
-                        cubes.remove(cube)
-                        score += 1
-            elif event.button == 3:  # Right mouse button
-                for cube in cubes[:]:
-                    if cube['color'] == BLUE and cube['rect'].collidepoint(mouse_x, mouse_y):
-                        cubes.remove(cube)
-                        score += 1
+            setTimeout(() => {
+                cube.remove();
+            }, 5000); // Remove cube after 5 seconds
+        }
 
-    # Clear the screen
-    window.fill((0, 0, 0))
+        // Main game loop
+        let score = 0;
+        const scoreElement = document.getElementById('score');
 
-    # Update game state
-    # Spawn new cubes
-    generate_cube()
+        setInterval(() => {
+            generateCube();
+        }, 1000);
 
-    # Move cubes
-    for cube in cubes:
-        cube['rect'].move_ip(0, cube_speed)
-
-    # Check for collisions with cubes
-    for cube in cubes[:]:
-        if cube['rect'].bottom >= WINDOW_HEIGHT:
-            cubes.remove(cube)
-
-    # Draw objects
-    for cube in cubes:
-        pygame.draw.rect(window, cube['color'], cube['rect'])
-
-    # Draw score
-    score_text = font_small.render('Score: ' + str(score), True, WHITE)
-    window.blit(score_text, (10, 10))
-
-    # Update the display
-    pygame.display.flip()
-
-    # Cap the frame rate
-    clock.tick(30)
-
-# Quit Pygame
-pygame.quit()
-sys.exit()
+    </script>
+</body>
+</html>
